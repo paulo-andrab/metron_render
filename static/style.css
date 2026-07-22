@@ -1,0 +1,699 @@
+/* ==========================================================================
+   METRON SC_V0.3 — Corporate Cyberpunk Theme
+   ========================================================================== */
+
+/* --- Design Tokens --- */
+:root {
+    --bg-deep:    #08090d;
+    --bg-panel:   #0d0f14;
+    --bg-surface: #12151c;
+    --bg-elevated:#181c26;
+
+    --border:     #1e2230;
+    --border-lit: #2a3040;
+
+    --neon-xml:   #e8375a;
+    --neon-csv:   #00c8e0;
+    --neon-ok:    #00d68f;
+    --neon-err:   #ff4757;
+    --neon-warn:  #f0c030;
+    --neon-ign:   #4a5068;
+
+    --text-prim:  #e8eaf0;
+    --text-sec:   #8890a4;
+    --text-dim:   #4a5068;
+
+    --radius:     6px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-deep);
+    color: var(--text-prim);
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 24px;
+    min-height: 100vh;
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.12) 2px,
+            rgba(0, 0, 0, 0.12) 4px
+        );
+}
+
+/* --- Container Principal --- */
+.cyber-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    position: relative;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.4),
+        0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.cyber-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: linear-gradient(
+        90deg,
+        var(--neon-xml) 0%,
+        var(--neon-csv) 50%,
+        var(--neon-ok) 100%
+    );
+    opacity: 0.8;
+}
+
+/* --- Header --- */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.header h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--text-prim);
+    text-transform: uppercase;
+}
+
+.header .version-tag {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+}
+
+/* --- Upload Section --- */
+.upload-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 28px;
+    padding: 28px 24px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.file-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 170px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* --- Icon Button --- */
+.icon-btn {
+    width: 88px;
+    height: 88px;
+    border: 1px solid var(--border-lit);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    background: var(--bg-elevated);
+}
+
+.icon-btn svg {
+    width: 40px;
+    height: 40px;
+    transition: transform var(--transition);
+}
+
+.icon-btn:hover svg {
+    transform: scale(1.08);
+}
+
+/* XML icon theme */
+.xml-theme .icon-btn svg {
+    fill: none;
+    stroke: var(--neon-xml);
+    stroke-width: 1.5;
+}
+
+.xml-theme:hover .icon-btn {
+    border-color: var(--neon-xml);
+    box-shadow: 0 0 16px rgba(232, 55, 90, 0.2);
+    background: rgba(232, 55, 90, 0.06);
+}
+
+/* CSV icon theme */
+.csv-theme .icon-btn svg {
+    fill: none;
+    stroke: var(--neon-csv);
+    stroke-width: 1.5;
+}
+
+.csv-theme:hover .icon-btn {
+    border-color: var(--neon-csv);
+    box-shadow: 0 0 16px rgba(0, 200, 224, 0.2);
+    background: rgba(0, 200, 224, 0.06);
+}
+
+/* File labels */
+.file-label {
+    margin-top: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--text-sec);
+    letter-spacing: 1.5px;
+}
+
+.file-name {
+    margin-top: 4px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    text-align: center;
+}
+
+.file-selected {
+    color: var(--text-prim);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* --- Center Action Column --- */
+.mid-action-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+/* --- Copy Query Button --- */
+.btn-copy {
+    background: transparent;
+    color: var(--text-sec);
+    border: 1px solid var(--border-lit);
+    padding: 8px 14px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: var(--radius);
+    font-family: inherit;
+}
+
+.btn-copy svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.btn-copy:hover {
+    color: var(--neon-warn);
+    border-color: var(--neon-warn);
+    background: rgba(240, 192, 48, 0.06);
+    box-shadow: 0 0 12px rgba(240, 192, 48, 0.15);
+}
+
+/* --- Scan Button --- */
+.btn-cyber {
+    background: transparent;
+    color: var(--neon-csv);
+    border: 1px solid var(--neon-csv);
+    padding: 10px 32px;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    letter-spacing: 2px;
+    border-radius: var(--radius);
+}
+
+.btn-cyber:hover {
+    background: var(--neon-csv);
+    color: var(--bg-deep);
+    box-shadow: 0 0 20px rgba(0, 200, 224, 0.35);
+}
+
+/* --- Error Banner --- */
+.error-banner {
+    border: 1px solid var(--neon-err);
+    color: var(--neon-err);
+    text-align: center;
+    padding: 16px 20px;
+    background: rgba(255, 71, 87, 0.06);
+    margin: 20px 0;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* --- HUD Metrics --- */
+/* #9 — 6 colunas para incluir Ignored */
+.hud-display {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.metric-box {
+    text-align: center;
+    padding: 16px 12px;
+    background: var(--bg-surface);
+    font-family: 'Orbitron', sans-serif;
+}
+
+.metric-val {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 900;
+    line-height: 1.3;
+}
+
+.metric-val--total   { color: var(--text-prim); }
+.metric-val--ok      { color: var(--neon-ok); }
+.metric-val--err     { color: var(--neon-err); }
+.metric-val--miss    { color: var(--neon-warn); }
+.metric-val--ign     { color: var(--neon-ign); }
+/* Removed metric-val--version as it is no longer in hud-display */
+
+.metric-label {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    display: block;
+}
+
+/* --- Schema Bar --- */
+.schema-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.schema-bar-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+}
+
+.schema-input {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-lit);
+    border-radius: var(--radius);
+    color: var(--text-prim);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 6px 12px;
+    width: 220px;
+    text-align: center;
+    transition: all var(--transition);
+    text-transform: uppercase;
+}
+
+.schema-input::placeholder {
+    color: var(--text-dim);
+    text-transform: none;
+    font-weight: 400;
+}
+
+.schema-input:focus {
+    outline: none;
+    border-color: var(--neon-csv);
+    box-shadow: 0 0 12px rgba(0, 200, 224, 0.2);
+    background: rgba(0, 200, 224, 0.04);
+}
+
+.version-bar-sep {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+}
+
+/* --- Version Bar --- */
+.version-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.version-bar-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+}
+
+.version-bar-val {
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Fira Code', monospace;
+    letter-spacing: 1px;
+}
+
+/* --- #8 Filter Bar --- */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.filter-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-right: 4px;
+}
+
+.filter-btn {
+    background: transparent;
+    color: var(--text-sec);
+    border: 1px solid var(--border-lit);
+    padding: 5px 14px;
+    font-size: 0.68rem;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+}
+
+.filter-btn:hover,
+.filter-btn--active {
+    color: var(--text-prim);
+    border-color: var(--neon-csv);
+    background: rgba(0, 200, 224, 0.06);
+}
+
+.filter-btn--err:hover,
+.filter-btn--err.filter-btn--active {
+    color: var(--neon-err);
+    border-color: var(--neon-err);
+    background: rgba(255, 71, 87, 0.06);
+}
+
+.filter-btn--miss:hover,
+.filter-btn--miss.filter-btn--active {
+    color: var(--neon-warn);
+    border-color: var(--neon-warn);
+    background: rgba(240, 192, 48, 0.06);
+}
+
+.filter-btn--ign:hover,
+.filter-btn--ign.filter-btn--active {
+    color: var(--text-sec);
+    border-color: var(--border-lit);
+    background: rgba(74, 80, 104, 0.12);
+}
+
+/* --- Table --- */
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.cyber-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Header blocks */
+.cyber-table th {
+    padding: 10px 12px;
+    text-align: left;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.header-block {
+    text-align: center !important;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    padding: 12px;
+    background: var(--bg-surface);
+    letter-spacing: 2px;
+}
+
+.title-xml    { border-bottom: 2px solid var(--neon-xml); color: var(--neon-xml); }
+.title-csv    { border-bottom: 2px solid var(--neon-csv); color: var(--neon-csv); }
+.title-status { border-bottom: 2px solid var(--text-sec); color: var(--text-prim); }
+
+.th-xml {
+    color: var(--neon-xml);
+    background: rgba(232, 55, 90, 0.04);
+    border-bottom-color: rgba(232, 55, 90, 0.15);
+    font-size: 0.68rem;
+}
+
+.th-csv {
+    color: var(--neon-csv);
+    background: rgba(0, 200, 224, 0.04);
+    border-bottom-color: rgba(0, 200, 224, 0.15);
+    font-size: 0.68rem;
+}
+
+.th-status {
+    color: var(--text-prim);
+    background: var(--bg-elevated);
+    text-align: center !important;
+    font-size: 0.68rem;
+}
+
+/* Body cells */
+.cyber-table td {
+    padding: 7px 10px;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(30, 34, 48, 0.6);
+}
+
+.col-xml            { background-color: rgba(232, 55, 90, 0.02); color: var(--text-sec); }
+.col-xml:first-child { border-left: 2px solid rgba(232, 55, 90, 0.2); }
+.col-field-name     { color: var(--text-prim) !important; font-weight: 500; }
+.col-csv            { background-color: rgba(0, 200, 224, 0.02); color: var(--text-sec); }
+
+.col-status {
+    background-color: var(--bg-elevated);
+    text-align: center;
+    font-weight: 600;
+    border-left: 1px solid var(--border);
+    border-right: 2px solid var(--border-lit);
+    letter-spacing: 0.3px;
+}
+
+/* Row hover */
+.cyber-table tbody tr {
+    transition: background-color var(--transition);
+}
+
+.cyber-table tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Status classes */
+.st-ok  { color: var(--neon-ok); }
+.st-err { color: var(--neon-err); text-shadow: 0 0 4px rgba(255, 71, 87, 0.3); }
+.st-miss { color: var(--neon-warn); }
+.st-ign { color: var(--text-dim); font-style: italic; }
+
+/* Row-level highlight */
+tr.error .col-xml,
+tr.error .col-csv   { background-color: rgba(255, 71, 87, 0.04); }
+
+tr.missing .col-xml,
+tr.missing .col-csv { background-color: rgba(240, 192, 48, 0.03); }
+
+/* --- Inline Fix Button --- */
+.btn-fix {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border-lit);
+    padding: 1px 6px;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-left: 8px;
+    transition: all var(--transition);
+    vertical-align: middle;
+    font-family: inherit;
+}
+
+.btn-fix:hover {
+    color: var(--neon-err);
+    border-color: var(--neon-err);
+    background: rgba(255, 71, 87, 0.08);
+}
+
+/* --- Badge SCHEMA ativo (filter-bar) --- */
+.schema-active-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding: 5px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-lit);
+    border-radius: var(--radius);
+}
+
+.schema-active-badge .filter-label {
+    margin-right: 0;
+}
+
+.schema-active-val {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--neon-csv);
+    text-shadow: 0 0 4px rgba(0, 200, 224, 0.25);
+}
+
+/* Variante do btn-copy para COPY ALL FIXES */
+.btn-copy--fixes {
+    color: var(--neon-err);
+    border-color: var(--neon-err);
+}
+
+.btn-copy--fixes:hover {
+    color: var(--bg-deep);
+    background: var(--neon-err);
+    border-color: var(--neon-err);
+    box-shadow: 0 0 12px rgba(255, 71, 87, 0.3);
+}
+
+/* --- Hint highlight — laranja único para todos os tipos --- */
+.col-hint-smallint,
+.col-hint-integer,
+.col-hint-type,
+.col-hint-prec {
+    color: #ff8c00 !important;
+    font-weight: 700;
+}
+
+/* --- Badge HID --- */
+.badge-hid {
+    background: var(--bg-elevated);
+    color: var(--text-dim);
+    padding: 1px 5px;
+    font-size: 9px;
+    border: 1px solid var(--border-lit);
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+}
+
+/* --- Log Timestamp --- */
+.log-timestamp {
+    text-align: right;
+    margin-top: 16px;
+    color: var(--text-dim);
+    font-size: 0.65rem;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+    body { padding: 12px; }
+
+    .cyber-container { padding: 16px; }
+
+    .upload-section {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px 16px;
+    }
+
+    .mid-action-col { flex-direction: row; }
+
+    .hud-display { grid-template-columns: repeat(3, 1fr); }
+
+    .header h1 { font-size: 0.9rem; letter-spacing: 3px; }
+
+    .filter-bar { flex-wrap: wrap; }
+
+    .schema-bar { flex-wrap: wrap; }
+
+    .schema-input { width: 160px; }
+}
+
+@media (max-width: 600px) {
+    .hud-display { grid-template-columns: repeat(2, 1fr); }
+
+    .icon-btn { width: 70px; height: 70px; }
+
+    .icon-btn svg { width: 32px; height: 32px; }
+}

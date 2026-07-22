@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Metron — Ferramenta de análise e comparação de estruturas XML vs CSV para validação de schemas de banco de dados.">
+    <title>METRON</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="cyber-container">
+
+        <!-- Header -->
+        <div class="header">
+            <h1>METRON</h1>
+            <span class="version-tag">v0.4.3</span>
+        </div>
+
+        <!-- Upload Form -->
+        <form action="/" method="post" enctype="multipart/form-data" id="scanForm">
+
+            <!-- Schema Input -->
+            <div class="schema-bar">
+                <label for="schema_input" class="schema-bar-label">SCHEMA:</label>
+                <input type="text" name="schema_name" id="schema_input" class="schema-input"
+                       placeholder="SCHEMA" value="{{ schema_name|default('') }}" autocomplete="off"
+                       oninput="this.value = this.value.toUpperCase()">
+            </div>
+
+            <div class="upload-section">
+
+                <!-- XML Upload -->
+                <div class="file-wrapper xml-theme">
+                    <input type="file" name="xml_file" id="xml_input" accept=".xml"
+                        onchange="updateUI('xml_input', 'xml_name')">
+                    <label for="xml_input" class="icon-btn">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <polyline points="16 13 9 13"></polyline>
+                            <polyline points="16 17 9 17"></polyline>
+                            <polyline points="10 9 9 9"></polyline>
+                        </svg>
+                    </label>
+                    <div class="file-label">XML SOURCE</div>
+                    <div class="file-name" id="xml_name">&gt; WAITING...</div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mid-action-col">
+                    <button type="button" class="btn-copy" id="btnCopy" onclick="copyQuery()" title="Copiar Query SQL">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>COPY QUERY</span>
+                    </button>
+
+                    <button type="submit" class="btn-cyber" id="btnScan">[ SCAN ]</button>
+                </div>
+
+                <!-- CSV Upload -->
+                <div class="file-wrapper csv-theme">
+                    <input type="file" name="csv_file" id="csv_input" accept=".csv"
+                        onchange="updateUI('csv_input', 'csv_name')">
+                    <label for="csv_input" class="icon-btn">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                        </svg>
+                    </label>
+                    <div class="file-label">CSV DUMP</div>
+                    <div class="file-name" id="csv_name">&gt; WAITING...</div>
+                </div>
+
+            </div>
+        </form>
+
+        <!-- Error Message -->
+        {% if error %}
+        <div class="error-banner">
+            [CRITICAL ERROR]: {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Results -->
+        {% if show_results %}
+
+        <!-- #9 — HUD Metrics com ignored -->
+        <div class="hud-display">
+            <div class="metric-box">
+                <span class="metric-val metric-val--total">{{ summary.total }}</span>
+                <span class="metric-label">Total Fields</span>
+            </div>
+            <div class="metric-box">
+                <span class="metric-val metric-val--ok">{{ summary.ok }}</span>
+                <span class="metric-label">Matches</span>
+            </div>
+            <div class="metric-box">
+                <span class="metric-val metric-val--err">{{ summary.errors }}</span>
+                <span class="metric-label">Divergences</span>
+            </div>
+            <div class="metric-box">
+                <span class="metric-val metric-val--miss">{{ summary.missing }}</span>
+                <span class="metric-label">Missing</span>
+            </div>
+            <div class="metric-box">
+                <span class="metric-val metric-val--ign">{{ summary.ignored }}</span>
+                <span class="metric-label">Ignored</span>
+            </div>
+        </div>
+
+        <!-- Div exclusiva para XML VERSION -->
+        <div class="version-bar">
+            <span class="version-bar-label">XML VERSION:</span>
+            <span class="version-bar-val">{{ summary.xml_ver }}</span>
+        </div>
+
+        <!-- #8 — Filtro de status + COPY ALL FIXES -->
+        <div class="filter-bar">
+            <span class="filter-label">FILTER</span>
+            <button class="filter-btn filter-btn--active" onclick="filterRows('all', this)">ALL</button>
+            <button class="filter-btn" onclick="filterRows('ok', this)">OK</button>
+            <button class="filter-btn filter-btn--err" onclick="filterRows('error', this)">DIVERGENCES</button>
+            <button class="filter-btn filter-btn--miss" onclick="filterRows('missing', this)">MISSING</button>
+            <button class="filter-btn filter-btn--ign" onclick="filterRows('ignored', this)">IGNORED</button>
+
+            <span class="schema-active-badge">
+                <span class="filter-label">SCHEMA</span>
+                <span class="schema-active-val">{{ summary.schema }}</span>
+            </span>
+
+            {% if summary.errors > 0 or summary.missing > 0 or summary.ignored > 0 %}
+            <button class="btn-copy btn-copy--fixes" id="btnCopyAllFixes" onclick="copyAllFixes()" title="Copiar todas as queries de correção">
+                <svg viewBox="0 0 24 24">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>COPY ALL FIXES</span>
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="table-wrapper">
+            <table class="cyber-table" id="resultsTable">
+                <thead>
+                    <tr>
+                        <th colspan="7" class="header-block title-xml">XML STRUCTURE DATA</th>
+                        <th colspan="5" class="header-block title-csv">CSV DATABASE DUMP</th>
+                        <th class="header-block title-status">DIAGNOSTIC</th>
+                    </tr>
+                    <tr>
+                        <th class="th-xml">ID</th>
+                        <th class="th-xml">FIELD_NAME</th>
+                        <th class="th-xml">TYPE</th>
+                        <th class="th-xml">SZ</th>
+                        <th class="th-xml">SC</th>
+                        <th class="th-xml">DIG</th>
+                        <th class="th-xml">OFF</th>
+
+                        <th class="th-csv">ID</th>
+                        <th class="th-csv">COLUMN_NAME</th>
+                        <th class="th-csv">TYPE</th>
+                        <th class="th-csv">PREC</th>
+                        <th class="th-csv">SCALE</th>
+
+                        <th class="th-status">STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    {% if row.class == 'ok' %}
+                        {% set st_class = 'st-ok' %}
+                    {% elif row.class == 'error' %}
+                        {% set st_class = 'st-err' %}
+                    {% elif row.class == 'missing' %}
+                        {% set st_class = 'st-miss' %}
+                    {% else %}
+                        {% set st_class = 'st-ign' %}
+                    {% endif %}
+
+                    <tr class="{{ row.class }}" data-status="{{ row.class }}">
+                        <td class="col-xml">
+                            {% if row.id == 'HID' %}<span class="badge-hid">HID</span>{% else %}{{ row.id }}{% endif %}
+                        </td>
+                        <td class="col-xml col-field-name">{{ row.xml_name }}</td>
+                        <td class="col-xml {% if 'xml_type' in row.highlights %}col-hint-type{% endif %}">{{ row.xml_type }}</td>
+                        <td class="col-xml {% if 'xml_size' in row.highlights %}col-hint-prec{% endif %}">{{ row.xml_size }}</td>
+                        <td class="col-xml {% if 'xml_scale' in row.highlights %}col-hint-prec{% endif %}">{{ row.xml_scale }}</td>
+                        <td class="col-xml">{{ row.xml_digits }}</td>
+                        <td class="col-xml">{{ row.xml_offset }}</td>
+
+                        <td class="col-csv">
+                            {% if row.id == 'HID' %}<span class="badge-hid">HID</span>{% else %}{{ row.csv_order }}{% endif %}
+                        </td>
+                        <td class="col-csv col-field-name">{{ row.csv_name }}</td>
+                        <td class="col-csv {% if 'csv_type' in row.highlights %}col-hint-type{% endif %}">{{ row.csv_type }}</td>
+                        <td class="col-csv {% if 'csv_prec' in row.highlights %}col-hint-prec{% endif %}">{{ row.csv_prec }}</td>
+                        <td class="col-csv {% if 'csv_scale' in row.highlights %}col-hint-prec{% endif %}">{{ row.csv_scale }}</td>
+
+                        <td class="col-status {{ st_class }}">
+                            {{ row.status }}
+                            {% if row.fix_query %}
+                            <button class="btn-fix"
+                                    data-query="{{ row.fix_query }}"
+                                    onclick="copyFix(this, {{ row.fix_query | tojson }})"
+                                    title="{{ row.fix_query }}">⧉</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="log-timestamp">
+            LOG_TIMESTAMP: {{ summary.date }}
+        </div>
+
+        {% endif %}
+    </div>
+
+    <script>
+        // Atualiza nome do arquivo selecionado na UI
+        function updateUI(inputId, nameId) {
+            const input = document.getElementById(inputId);
+            const nameDisplay = document.getElementById(nameId);
+
+            if (input.files.length > 0) {
+                nameDisplay.innerText = "> " + input.files[0].name;
+                nameDisplay.classList.add("file-selected");
+                const btn = input.parentElement.querySelector('.icon-btn');
+                btn.style.borderColor = "#fff";
+                btn.style.boxShadow = "0 0 12px rgba(255,255,255,0.15)";
+            } else {
+                nameDisplay.innerText = "> WAITING...";
+                nameDisplay.classList.remove("file-selected");
+            }
+        }
+
+        // #7 — Validação client-side antes do submit
+        document.getElementById('scanForm').addEventListener('submit', function (e) {
+            const xml = document.getElementById('xml_input');
+            const csv = document.getElementById('csv_input');
+
+            if (!xml.files.length || !csv.files.length) {
+                e.preventDefault();
+                const missing = [];
+                if (!xml.files.length) missing.push('XML');
+                if (!csv.files.length) missing.push('CSV');
+                alert('[INPUT ERROR]: Selecione os arquivos: ' + missing.join(' e ') + '.');
+            }
+        });
+
+        // Copia query SQL para o clipboard
+        function copyQuery() {
+            const schemaInput = document.getElementById('schema_input');
+            const schemaVal = (schemaInput && schemaInput.value.trim()) ? schemaInput.value.trim() : 'SCHEMA';
+            const sqlQuery = `DECLARE SET VARCHAR(255) @TBL_OWNER = '${schemaVal}';
+DECLARE SET VARCHAR(255) @TBL_NAME = 'TABLE';
+SELECT
+    COLUMN_ORDER AS COLUMN_ORDER
+    ,TRIM(COLUMN_NAME) AS COLUMN_NAME
+    ,TYPE_NAME AS TYPE_NAME
+    ,PRECISION
+    ,SCALE
+FROM
+    SYSCOLUMN
+WHERE
+    TABLE_OWNER = @TBL_OWNER
+    AND TABLE_NAME = @TBL_NAME
+ORDER BY
+    COLUMN_ORDER;`;
+
+            navigator.clipboard.writeText(sqlQuery).then(function () {
+                const btn = document.getElementById('btnCopy');
+                const span = btn.querySelector('span');
+                const originalText = span.innerText;
+                span.innerText = "COPIED!";
+                btn.style.color = "var(--neon-ok)";
+                btn.style.borderColor = "var(--neon-ok)";
+                setTimeout(() => {
+                    span.innerText = originalText;
+                    btn.style.color = "";
+                    btn.style.borderColor = "";
+                }, 2000);
+            }, function (err) {
+                console.error('Clipboard error:', err);
+                alert("Erro ao copiar para a área de transferência.");
+            });
+        }
+
+        // #8 — Filtro de linhas por status
+        function filterRows(status, btn) {
+            const rows = document.querySelectorAll('#resultsTable tbody tr');
+            rows.forEach(function (row) {
+                if (status === 'all' || row.dataset.status === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            document.querySelectorAll('.filter-btn').forEach(function (b) {
+                b.classList.remove('filter-btn--active');
+            });
+            btn.classList.add('filter-btn--active');
+        }
+
+        // Copia fix_query de uma linha individual
+        function copyFix(btn, query) {
+            navigator.clipboard.writeText(query).then(function () {
+                const original = btn.innerText;
+                btn.innerText = '✓';
+                btn.style.color = 'var(--neon-ok)';
+                setTimeout(() => {
+                    btn.innerText = original;
+                    btn.style.color = '';
+                }, 1500);
+            });
+        }
+
+        // Copia todas as fix_queries de uma vez
+        function copyAllFixes() {
+            const alters = [];
+            let disableStmt = "";
+            let rebuildStmt = "";
+            let updateStmt = "";
+
+            document.querySelectorAll('.btn-fix').forEach(function (btn) {
+                const q = btn.dataset.query;
+                if (q) {
+                    const lines = q.split('\n');
+                    if (lines.length >= 3) {
+                        if (!disableStmt) disableStmt = lines[0];
+
+                        let isUpdate = lines[lines.length - 1].startsWith("UPDATE STATISTICS");
+                        let rebuildIdx = isUpdate ? lines.length - 2 : lines.length - 1;
+
+                        if (!rebuildStmt) rebuildStmt = lines[rebuildIdx];
+                        if (isUpdate && !updateStmt) updateStmt = lines[lines.length - 1];
+
+                        // Pegar todos os ALTERs no meio
+                        for (let i = 1; i < rebuildIdx; i++) {
+                            alters.push(lines[i]);
+                        }
+                    }
+                }
+            });
+            if (!alters.length) return;
+
+            let finalQuery = disableStmt + '\n' + alters.join('\n') + '\n' + rebuildStmt;
+            if (updateStmt) {
+                finalQuery += '\n' + updateStmt;
+            }
+
+            navigator.clipboard.writeText(finalQuery).then(function () {
+                const btn = document.getElementById('btnCopyAllFixes');
+                const span = btn.querySelector('span');
+                const original = span.innerText;
+                span.innerText = 'COPIED!';
+                btn.style.color = 'var(--neon-ok)';
+                btn.style.borderColor = 'var(--neon-ok)';
+                setTimeout(() => {
+                    span.innerText = original;
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
